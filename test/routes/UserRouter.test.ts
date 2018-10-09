@@ -58,7 +58,7 @@ describe('UserRouter', () => {
                 .send(userJSON)
                 .end((err, res) => {
                     assert(err === null || res !== null, 'It creates the user even with a duplicated email');
-                    assert(res.status === 422, 'Wrong status code. Expect 422 status code');
+                    assert(res.status === 422, `Wrong status code: ${res.status}. Expect 422 status code`);
                     done();
                 });
         });
@@ -74,9 +74,9 @@ describe('UserRouter', () => {
                 .send(userJSON)
                 .end((err, res) => {
                     assert(err === null &&
-                        res.body.email ===  "dimas@dimasgabriel.net" &&
-                        res.body.name === "Dimas Gabriel" &&
-                        res.body.gender === "male",
+                        res.body.data.email ===  "dimas@dimasgabriel.net" &&
+                        res.body.data.name === "Dimas Gabriel" &&
+                        res.body.data.gender === "male",
 
                          'It not creates a valid user.');
                     

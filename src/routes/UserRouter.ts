@@ -1,3 +1,5 @@
+import { APIError } from './../models/APIError';
+import { APIResponse } from './../models/APIResponse';
 import { User } from './../models/UserModel';
 import {Router, Request, Response, Application} from "express";
 
@@ -20,18 +22,16 @@ export class UserRouter {
         res.send("Get Users!");
     }
 
-    private async createUser(req: Request, res: Response) {
+    private async createUser(req: Request, res: Response, next) {
         const newUser = new User(req.body);
         
         try {
             const u = await newUser.save();
-            res.status(201).send(u);
+            let response = new APIResponse(true, 201, u);
+            res.status(201).send(response);
         }catch (err) {
-            if (err.$isValidatorError) {
-                console.log("Validation Error:" + err);
-            }
-            
-            res.status(422).send(err);
+            let apiError = new APIError(err.message, null, 422);
+            next(apiError);
         }
     }
 }

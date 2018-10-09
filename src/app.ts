@@ -1,4 +1,5 @@
 import { UserRouter } from './routes/UserRouter';
+import { errorHandler } from './helpers/ErrorMiddleware';
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import * as dotenv from "dotenv";
@@ -33,6 +34,9 @@ class App {
 
     private setupRouters(): void {
         this.userRouter = new UserRouter(this.app);
+
+
+        this.app.use(errorHandler);
     }
 }
 
