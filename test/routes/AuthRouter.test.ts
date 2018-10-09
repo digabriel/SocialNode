@@ -11,20 +11,20 @@ chai.use(chaiHttp);
 describe('AuthRouter', () => {
     // Empty Users before each test
     before((done) => {
-        User.deleteMany({}, () => {
-            done();
+            User.deleteMany({}, () => {
+            // Creates a test user
+            const userJSON = {
+                "email" : "dimas@test.com",
+                "password" : "123456",
+                "name" : "Dimas Gabriel",
+                "gender" : "male"
+            }; 
+
+            const user = new User(userJSON);
+            user.save().then(_ => {
+                done();
+            });
         });
-
-        // Creates a test user
-        const userJSON = {
-            "email" : "dimas@test.com",
-            "password" : "123456",
-            "name" : "Dimas Gabriel",
-            "gender" : "male"
-        }; 
-
-        const user = new User(userJSON);
-        user.save();
     });
 
     describe('POST /auth', () => {

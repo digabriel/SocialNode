@@ -51,9 +51,8 @@ describe('UserRouter', () => {
                               "password" : "123456"};
 
             const user = new User(userJSON);
-            user.save();
-
-            chai.request(app)
+            user.save().then(_ => {
+                chai.request(app)
                 .post('/users')
                 .send(userJSON)
                 .end((err, res) => {
@@ -61,6 +60,9 @@ describe('UserRouter', () => {
                     assert(res.status === 422, `Wrong status code: ${res.status}. Expect 422 status code`);
                     done();
                 });
+            });
+
+
         });
 
         it('it should create a valid user', (done) => {
