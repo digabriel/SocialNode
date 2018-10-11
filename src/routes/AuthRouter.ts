@@ -24,10 +24,11 @@ export class AuthRouter {
    }
 
    private config() {
-      this.router.post('/', this.authValidations, this.authenticate);
+      this.router.post('/', this.authValidations, this.validateAuth, this.authenticate);
    }
 
-   private async authenticate(req: Request, res: Response, next) {
+   // Auth validation
+   private async validateAuth(req: Request, res: Response, next) {
       if (!validationResult(req).isEmpty()) {
          const apiError = new APIError(res.__('auth_wrong_request_message'), 400, 400);
          return next(apiError);
@@ -36,14 +37,14 @@ export class AuthRouter {
       // Grant that an user with this email exists
       const count = await User.count({email: req.body.email});
       if (count == 0) {
-         const apiError = new APIError(
-            res.__('auth_failed_message'),
-            APIErrorCodes.AUTH_FAILED,
-            401
-         );
-         return next(apiError);
+         return next(APIError.errorForCode(APIErrorCodes.AUTH_FAILED, req));
       }
 
+      next();
+   }
+
+   // Auth authentication
+   private async authenticate(req: Request, res: Response, next) {
       //Fetch the user
       try {
          const user = await User.findOne({email: req.body.email});
@@ -51,12 +52,7 @@ export class AuthRouter {
 
          // Invalid password
          if (!pass) {
-            const apiError = new APIError(
-               res.__('auth_failed_message'),
-               APIErrorCodes.AUTH_FAILED,
-               401
-            );
-            return next(apiError);
+            return next(APIError.errorForCode(APIErrorCodes.AUTH_FAILED, req));
          }
 
          const refreshToken = randomstring.generate({length: 100, charset: 'alphabetic'});
