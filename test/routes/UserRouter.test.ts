@@ -22,8 +22,8 @@ describe('UserRouter', () => {
             chai.request(app)
                 .get('/users')
                 .end((err, res) => {
-                    assert(err === null, "We have an error: " + err);
-                    assert(res.status === 200, "Wrong status code: " + res.status);
+                    assert.isNull(err, `We have an error: ${err}`);
+                    assert.equal(res.status, 200, 'Wrong status code: ' + res.status);
                     done();
                 });
         })
@@ -39,8 +39,7 @@ describe('UserRouter', () => {
                 .post('/users')
                 .send(user)
                 .end((err, res) => {
-                    assert(err === null && res !== null, 'It creates the user even with a short password');
-                    assert(res.status === 422, 'Wrong status code. Expect 422 status code');
+                    assert.equal(res.status, 422, `Wrong status code: ${res.status}`);
                     done();
                 });
         });
@@ -56,8 +55,7 @@ describe('UserRouter', () => {
                 .post('/users')
                 .send(userJSON)
                 .end((err, res) => {
-                    assert(err === null || res !== null, 'It creates the user even with a duplicated email');
-                    assert(res.status === 422, `Wrong status code: ${res.status}. Expect 422 status code`);
+                    assert.equal(res.status, 422, `Wrong status code`);
                     done();
                 });
             });
@@ -75,14 +73,16 @@ describe('UserRouter', () => {
                 .post('/users')
                 .send(userJSON)
                 .end((err, res) => {
-                    assert(err === null &&
-                        res.body.data.email ===  "dimas@dimasgabriel.net" &&
-                        res.body.data.name === "Dimas Gabriel" &&
-                        res.body.data.gender === "male",
 
-                         'It not creates a valid user.');
-                    
-                        assert(res.status === 201, 'Wrong status code. Expect 201 status code');
+                    const data = res.body.data;
+
+                    assert.equal(res.status, 201, 'Wrong status code');
+                    assert.isNull(err, `We have an error: ${err}`);
+                    assert.isNotNull(data);
+                    assert.isString(data._id, `No user id`);
+                    assert.equal(data.name, userJSON['name'], `Wrong user name`)
+                    assert.equal(data.gender, userJSON['gender'], `Wrong user gender`);
+
                     done();
                 });
         });

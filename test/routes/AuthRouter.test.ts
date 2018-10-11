@@ -39,11 +39,41 @@ describe('AuthRouter', () => {
                 .post('/auth')
                 .send(authJSON)
                 .end((err, res) => {
-                    assert(res.status === 200, "Wrong status code: " + res.status);
-                    assert(err === null, "We have an error: " + err);
-                    assert(res.body.access_token !== null, "Response without access_token field");
-                    assert(res.body.refresh_token !== null, "Response without refresh_token field");
-                    assert(res.body.user !== null, "Response without user field");
+
+                    const data = res.body.data;
+
+                    assert.equal(res.status, 200, "Wrong status code: " + res.status);
+                    assert.notExists(err, "We have an error: " + err);
+                    
+                    assert.typeOf(data.access_token, 'string', "Response without access_token field");
+                    assert.typeOf(data.refresh_token, 'string', "Response without refresh_token field");
+                    assert.exists(data.user, "Response without user field");
+                    assert.notExists(data.user.email, 'Response with user email included');
+                    assert.notExists(data.user.password, 'Response with user password included');
+
+                    done();
+                });
+        })
+    });
+
+    describe('POST /auth', () => {
+        // Auth JSON post body
+        const authJSON = {
+            "email" : "dimas@test.com",
+            "password" : "12356"
+        };
+
+        it('it should not authenticate an invalid email/password combinator and return the correct error code', (done) => {
+            chai.request(app)
+                .post('/auth')
+                .send(authJSON)
+                .end((err, res) => {
+                    const data = res.body.data;
+
+                    assert.equal(res.status, 401, 'Wrong status code');
+                    assert.equal(res.body.code, 1002, 'Wrong error code');
+                    assert.isString(res.body.message, 'No error message');
+
                     done();
                 });
         })

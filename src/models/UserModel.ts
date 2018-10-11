@@ -1,10 +1,21 @@
-import * as mongoose from "mongoose";
+import { Document, Schema, Model, model} from "mongoose";
 import * as bcrypt from "bcrypt";
 import * as uniqueValidator from "mongoose-unique-validator";
 
 const SALT_WORK_FACTOR = 10;
 
-const UserSchema = new mongoose.Schema({
+export interface IUser {
+    name: String,
+    email: String,
+    gender?: String,
+    password: String
+}
+
+export interface IUserModel extends IUser, Document {
+    comparePassword(candidatePassword: String) : Promise<boolean>
+}
+
+const UserSchema = new Schema({
     name: {
         type: String,
         required: 'Enter your name'
@@ -49,6 +60,14 @@ UserSchema.pre('save', async function(next) {
     next();
 });
 
+UserSchema.set('toJSON', {
+    transform: function(doc, ret, opt) {
+        delete ret['password']
+        delete ret['email']
+        return ret
+    }
+})
+
 UserSchema.plugin(uniqueValidator, {message : "We found an user with the same {PATH}"});
 
-export const User = mongoose.model('User', UserSchema);
+export const User: Model<IUserModel> = model<IUserModel>("User", UserSchema);

@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const uniqueValidator = require("mongoose-unique-validator");
 const SALT_WORK_FACTOR = 10;
 const UserSchema = new mongoose.Schema({
     name: {
@@ -20,6 +21,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: 'Enter your email',
         unique: true
+    },
+    gender: {
+        type: String,
+        required: false,
+        enum: ["male", "female"]
     },
     password: {
         type: String,
@@ -40,13 +46,13 @@ UserSchema.pre('save', function (next) {
         // only hash the password if it has been modified (or is new)
         if (!user.isModified('password'))
             return next();
-        if (user.get('password').)
-            // hash the new password and update
-            const password = user.get('password');
+        // hash the new password and update
+        const password = user.get('password');
         const hash = yield bcrypt.hash(password, SALT_WORK_FACTOR);
         user.set('password', hash);
         next();
     });
 });
+UserSchema.plugin(uniqueValidator, { message: "We found an user with the same {PATH}" });
 exports.User = mongoose.model('User', UserSchema);
 //# sourceMappingURL=UserModel.js.map

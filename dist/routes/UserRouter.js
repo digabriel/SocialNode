@@ -8,6 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const APIError_1 = require("./../models/APIError");
+const APIResponse_1 = require("./../models/APIResponse");
 const UserModel_1 = require("./../models/UserModel");
 const express_1 = require("express");
 class UserRouter {
@@ -23,15 +25,17 @@ class UserRouter {
     getUsers(req, res) {
         res.send("Get Users!");
     }
-    createUser(req, res) {
+    createUser(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             const newUser = new UserModel_1.User(req.body);
             try {
                 const u = yield newUser.save();
-                res.status(201).send(u);
+                let response = new APIResponse_1.APIResponse(true, 201, u);
+                res.status(201).send(response);
             }
             catch (err) {
-                res.status(500).send(err);
+                let apiError = new APIError_1.APIError(err.message, null, 422);
+                next(apiError);
             }
         });
     }
