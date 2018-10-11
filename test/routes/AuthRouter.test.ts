@@ -34,13 +34,12 @@ describe('AuthRouter', () => {
       password: '123456'
     };
 
-    it('it should authenticate a valid user and return an access token and the user information', (done) => {
+    it('it should authenticate a valid user', (done) => {
       chai
         .request(app)
         .post('/auth')
         .send(authJSON)
         .end((err, res) => {
-          console.log('Error: ' + err);
           const data = res.body.data;
 
           assert.equal(res.status, 200, 'Wrong status code: ' + res.status);
@@ -55,16 +54,13 @@ describe('AuthRouter', () => {
           done();
         });
     });
-  });
 
-  describe('POST /auth', () => {
-    // Auth JSON post body
-    const authJSON = {
+    const worngAuthJSON = {
       email: 'dimas@test.com',
       password: '12356'
     };
 
-    it('it should not authenticate an invalid email/password combinator and return the correct error code', (done) => {
+    it('it should not authenticate an invalid email/password combination', (done) => {
       chai
         .request(app)
         .post('/auth')
