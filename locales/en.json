@@ -1,5 +1,8 @@
 {
 	"unknown_error_message" : "An unknown error occured",
-	"auth_wrong_request_message": "auth_wrong_request_message",
-	"auth_failed_message": "Authentication failed. Please check your email and password and try again"
+	"auth_wrong_request_message": "Authentication failed. Wrong request body.",
+	"auth_failed_message": "Authentication failed. Please check your email and password and try again",
+	"auth_refresh_wrong_request_message": "Authentication refresh failed. Wrong request body.",
+	"auth_invalid_access_token_message": "Invalid access token",
+	"auth_invalid_refresh_token_messgae": "Invalid refresh token"
 }

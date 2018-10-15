@@ -9,13 +9,6 @@ import * as jwt from 'jsonwebtoken';
 export class AuthRouter {
    private router: Router;
 
-   private authValidations = [
-      check('email').isEmail(),
-      check('password')
-         .not()
-         .isEmpty()
-   ];
-
    constructor(app: Application) {
       this.router = Router();
       this.config();
@@ -24,10 +17,23 @@ export class AuthRouter {
    }
 
    private config() {
-      this.router.post('/', this.authValidations, this.validateAuth, this.authenticate);
+      this.router.post('/', this.authValidators, this.validateAuth, this.authenticate.bind(this));
+      this.router.post('/refresh', this.refreshValidators, this.refreshToken.bind(this));
    }
 
    // Auth validation
+   private authValidators = [
+      check('email').isEmail(),
+      check('password')
+         .not()
+         .isEmpty()
+   ];
+
+   private refreshValidators = [
+      check('access_token').isString(),
+      check('refresh_token').isString()
+   ];
+
    private async validateAuth(req: Request, res: Response, next) {
       if (!validationResult(req).isEmpty()) {
          const apiError = new APIError(res.__('auth_wrong_request_message'), 400, 400);
@@ -56,26 +62,73 @@ export class AuthRouter {
          }
 
          const refreshToken = randomstring.generate({length: 100, charset: 'alphabetic'});
+
+         const token = await this.generateNewToken(user._id, refreshToken);
+
+         const data = {
+            access_token: token,
+            refresh_token: refreshToken,
+            user: user
+         };
+
+         res.status(200).json(new APIResponse(true, 200, data));
+      } catch (e) {
+         return next(APIError.unknown());
+      }
+   }
+
+   // Auth Refresh
+   private refreshToken(req: Request, res: Response, next) {
+      const self = this;
+
+      if (!validationResult(req).isEmpty()) {
+         const apiError = new APIError(res.__('auth_refresh_wrong_request_message'), 400, 400);
+         return next(apiError);
+      }
+
+      // Check if the access_token is valid
+      jwt.verify(req.body.access_token, process.env.JWT_SECRET, async (err, decoded) => {
+         if (err || !decoded) {
+            return next(APIError.errorForCode(APIErrorCodes.INVALID_ACCESS_TOKEN, req));
+         }
+
+         // Check if the refresh_token is valid
+         if (decoded.refresh_token != req.body.refres_token) {
+            return next(APIError.errorForCode(APIErrorCodes.INVALID_REFRESH_TOKEN, req));
+         }
+
+         const refreshToken = randomstring.generate({length: 100, charset: 'alphabetic'});
+
+         try {
+            const newToken = await self.generateNewToken(decoded.user_id, refreshToken);
+
+            const data = {
+               access_token: newToken,
+               refresh_token: refreshToken
+            };
+
+            res.status(200).json(new APIResponse(true, 200, data));
+         } catch (err) {
+            return next(err);
+         }
+      });
+   }
+
+   //Helpers
+   private generateNewToken(userId: String, refreshToken: String): Promise<String> {
+      return new Promise<String>((resolve, reject) => {
          jwt.sign(
-            {user_id: user._id},
+            {user_id: userId},
             process.env.JWT_SECRET,
             {expiresIn: process.env.JWT_EXPIRATION_TIME},
             function(err, token) {
                if (err) {
-                  return next(APIError.unknown());
+                  return reject(APIError.unknown());
                }
 
-               const data = {
-                  access_token: token,
-                  refresh_token: refreshToken,
-                  user: user
-               };
-
-               res.status(200).json(new APIResponse(true, 200, data));
+               resolve(token);
             }
          );
-      } catch (e) {
-         return next(APIError.unknown());
-      }
+      });
    }
 }

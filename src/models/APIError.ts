@@ -2,7 +2,9 @@ import {Request} from 'express';
 
 export const APIErrorCodes = {
    UNKNOWN: 1001,
-   AUTH_FAILED: 1002
+   AUTH_FAILED: 1002,
+   INVALID_ACCESS_TOKEN: 1003,
+   INVALID_REFRESH_TOKEN: 1004
 };
 
 export class APIError extends Error {
@@ -28,6 +30,12 @@ export class APIError extends Error {
 
          case APIErrorCodes.AUTH_FAILED:
             return new APIError(req.__('auth_failed_message'), code, 401);
+
+         case APIErrorCodes.INVALID_ACCESS_TOKEN:
+            return new APIError(req.__('auth_invalid_access_token_message'), code, 401);
+
+         case APIErrorCodes.INVALID_REFRESH_TOKEN:
+            return new APIError(req.__('auth_invalid_refresh_token_messgae'), code, 401);
 
          default:
             return APIError.unknown();
