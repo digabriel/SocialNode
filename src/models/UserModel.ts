@@ -4,14 +4,14 @@ import * as uniqueValidator from 'mongoose-unique-validator';
 
 const SALT_WORK_FACTOR = 10;
 
-export interface IUser {
+export interface User {
    name: String;
    email: String;
    gender?: String;
    password: String;
 }
 
-export interface IUserModel extends IUser, Document {
+export interface UserModel extends User, Document {
    comparePassword(candidatePassword: String): Promise<boolean>;
 }
 
@@ -70,4 +70,4 @@ UserSchema.set('toJSON', {
 
 UserSchema.plugin(uniqueValidator, {message: 'We found an user with the same {PATH}'});
 
-export const User: Model<IUserModel> = model<IUserModel>('User', UserSchema);
+export const User: Model<UserModel> = model<UserModel>('User', UserSchema);
