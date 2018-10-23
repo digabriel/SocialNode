@@ -1,13 +1,15 @@
+import {BaseRouter} from './BaseRouter';
 import {APIError, APIErrorCodes} from './../models/APIError';
 import {APIResponse} from './../models/APIResponse';
-import {User} from './../models/UserModel';
+import {User, UserInterface} from '../models/User';
 import {Router, Request, Response, Application} from 'express';
 import {Types} from 'mongoose';
 
-export class UserRouter {
+export class UserRouter extends BaseRouter<UserInterface> {
    private router: Router;
 
    constructor(app: Application) {
+      super(User);
       this.router = Router();
       this.config();
 
@@ -16,20 +18,20 @@ export class UserRouter {
 
    private config() {
       this.router.get('/', this.getUsers);
-      this.router.post('/', this.createUser);
-      this.router.post('/:user_id/follow', this.validateUserIDParam, this.followUser);
+      this.router.post('/', this.createUser.bind(this));
+      this.router.post('/:user_id/follow', this.validateUserIDParam.bind(this), this.followUser);
    }
 
    private async validateUserIDParam(req: Request, res: Response, next) {
       const userId = req.params.user_id;
 
-      if (!Types.ObjectId.isValid(userId)) {
-         return next(APIError.errorForCode(APIErrorCodes.RESOURCE_ID_NOT_FOUND, req));
-      }
-
-      const count = await User.count({_id: userId});
-      if (count == 0) {
-         return next(APIError.errorForCode(APIErrorCodes.RESOURCE_ID_NOT_FOUND, req));
+      try {
+         const exist = await this.exists(userId);
+         if (!exist) {
+            return next(APIError.resourceNotFound());
+         }
+      } catch (e) {
+         return next(e);
       }
 
       next();
@@ -39,17 +41,9 @@ export class UserRouter {
       res.send('Get Users!');
    }
 
-   private async createUser(req: Request, res: Response, next) {
+   private createUser(req: Request, res: Response, next) {
       const newUser = new User(req.body);
-
-      try {
-         const u = await newUser.save();
-         let response = new APIResponse(true, 201, u);
-         res.status(201).send(response);
-      } catch (err) {
-         let apiError = new APIError(err.message, null, 422);
-         next(apiError);
-      }
+      this.create(newUser, res, next);
    }
 
    private async followUser(req: Request, res: Response, next) {

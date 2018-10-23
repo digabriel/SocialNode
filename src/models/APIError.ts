@@ -24,6 +24,10 @@ export class APIError extends Error {
       return new APIError('An unknown error occured', APIErrorCodes.UNKNOWN, 500);
    }
 
+   static resourceNotFound(): APIError {
+      return new APIError('Resource if not found', APIErrorCodes.RESOURCE_ID_NOT_FOUND, 404);
+   }
+
    static errorForCode(code: number, req: Request): APIError {
       switch (code) {
          case APIErrorCodes.UNKNOWN:

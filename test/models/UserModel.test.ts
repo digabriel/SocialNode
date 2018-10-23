@@ -1,9 +1,9 @@
 process.env.NODE_ENV = 'test';
 
-import {User, UserModel} from '../../src/models/UserModel';
+import {User, UserInterface} from '../../src/models/User';
 import {assert} from 'chai';
 
-let user: UserModel;
+let user: UserInterface;
 
 describe('UserModel', () => {
    before((done) => {

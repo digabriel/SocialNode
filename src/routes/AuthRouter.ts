@@ -1,6 +1,6 @@
 import {APIResponse} from './../models/APIResponse';
 import {APIError, APIErrorCodes} from './../models/APIError';
-import {User} from './../models/UserModel';
+import {User} from '../models/User';
 import {Router, Request, Response, Application} from 'express';
 import {check, validationResult} from 'express-validator/check';
 import * as randomstring from 'randomstring';

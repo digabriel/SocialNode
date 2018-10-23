@@ -1,6 +1,6 @@
 process.env.NODE_ENV = 'test';
 
-import {User, UserModel} from './../../src/models/UserModel';
+import {User, UserInterface} from '../../src/models/User';
 import {application as app} from './../../src/server';
 const chaiHttp = require('chai-http');
 import * as chai from 'chai';
@@ -96,7 +96,7 @@ describe('UserRouter', () => {
 });
 
 describe('Relationships', () => {
-   let user1: UserModel, user2: UserModel;
+   let user1: UserInterface, user2: UserInterface;
    let user1AccessToken: string;
 
    // Create 2 users to use in the tests

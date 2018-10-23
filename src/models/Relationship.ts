@@ -1,6 +1,6 @@
 import {Document, Schema, Model, model} from 'mongoose';
 
-export interface RelationshipModel extends Document {
+export interface RelationshipInterface extends Document {
    fromUser: Schema.Types.ObjectId;
    toUser: Schema.Types.ObjectId;
    relation: String;
@@ -27,7 +27,7 @@ const RelationshipSchema = new Schema({
 
 RelationshipSchema.index({fromUser: 1, toUser: 1}, {unique: true});
 
-export const Relationship: Model<RelationshipModel> = model<RelationshipModel>(
+export const Relationship: Model<RelationshipInterface> = model<RelationshipInterface>(
    'Relationship',
    RelationshipSchema
 );

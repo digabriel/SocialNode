@@ -1,17 +1,16 @@
+import {UserInterface} from './User';
 import {Document, Schema, Model, model} from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import * as uniqueValidator from 'mongoose-unique-validator';
 
 const SALT_WORK_FACTOR = 10;
 
-export interface User {
+export interface UserInterface extends Document {
    name: String;
    email: String;
    gender?: String;
    password: String;
-}
 
-export interface UserModel extends User, Document {
    comparePassword(candidatePassword: String): Promise<boolean>;
 }
 
@@ -70,4 +69,4 @@ UserSchema.set('toJSON', {
 
 UserSchema.plugin(uniqueValidator, {message: 'We found an user with the same {PATH}'});
 
-export const User: Model<UserModel> = model<UserModel>('User', UserSchema);
+export const User: Model<UserInterface> = model<UserInterface>('User', UserSchema);

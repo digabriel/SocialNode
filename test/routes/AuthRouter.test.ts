@@ -1,6 +1,6 @@
 process.env.NODE_ENV = 'test';
 
-import {User} from './../../src/models/UserModel';
+import {User} from './../../src/models/User';
 import {application as app} from './../../src/server';
 const chaiHttp = require('chai-http');
 import * as chai from 'chai';
