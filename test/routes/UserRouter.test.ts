@@ -143,7 +143,13 @@ describe('Relationships', () => {
          .set('Access-Token', user1AccessToken)
          .end((err, res) => {
             assert.isNull(err, `We have an error: ${err}`);
-            assert.equal(res.status, 200, 'Wrong status code: ' + res.status);
+
+            assert.equal(
+               res.status,
+               200,
+               `Wrong status code ${res.status}. Message: ${res.body.message}`
+            );
+
             done();
          });
    });

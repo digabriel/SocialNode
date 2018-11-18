@@ -28,7 +28,6 @@ export function newRefreshToken(): String {
 }
 
 export function authMiddleware(req: MyRequest, res: Response, next) {
-   console.log(`URL: ${req.originalUrl}`);
    const accessToken = req.headers['access-token'] as string;
 
    if (accessToken) {

@@ -4,8 +4,8 @@ import {APIResponse} from './../models/APIResponse';
 import {User, UserInterface} from '../models/User';
 import {Router, Request, Response, Application} from 'express';
 import {Types, Schema} from 'mongoose';
-import MyRequest from 'models/MyRequest';
-import {Relationship} from 'models/Relationship';
+import MyRequest from './../models/MyRequest';
+import {Relationship} from './../models/Relationship';
 import {ObjectID, ObjectId} from 'bson';
 
 export class UserRouter extends BaseRouter<UserInterface> {
@@ -56,14 +56,15 @@ export class UserRouter extends BaseRouter<UserInterface> {
       }
 
       const r = new Relationship();
-      r.fromUser = new Schema.Types.ObjectId(req.userId);
-      r.toUser = new Schema.Types.ObjectId(req.params.user_id);
+      r.fromUser = req.userId;
+      r.toUser = req.params.user_id;
       r.relation = 'follow';
 
       try {
-         const d = await r.save();
-         let response = new APIResponse(true, 201, d);
-         res.status(201).send(response);
+         let d = await r.save();
+         d = await d.populate('fromUser toUser').execPopulate();
+         let response = new APIResponse(true, 200, d);
+         res.status(200).send(response);
       } catch (err) {
          let apiError = new APIError(err.message, null, 422);
          next(apiError);
