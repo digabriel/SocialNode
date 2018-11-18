@@ -3,8 +3,10 @@ import {APIError, APIErrorCodes} from './../models/APIError';
 import {APIResponse} from './../models/APIResponse';
 import {User, UserInterface} from '../models/User';
 import {Router, Request, Response, Application} from 'express';
-import {Types} from 'mongoose';
+import {Types, Schema} from 'mongoose';
 import MyRequest from 'models/MyRequest';
+import {Relationship} from 'models/Relationship';
+import {ObjectID, ObjectId} from 'bson';
 
 export class UserRouter extends BaseRouter<UserInterface> {
    private router: Router;
@@ -53,6 +55,18 @@ export class UserRouter extends BaseRouter<UserInterface> {
          return next(APIError.errorForCode(APIErrorCodes.INVALID_ACCESS_TOKEN, req));
       }
 
-      res.status(200).send();
+      const r = new Relationship();
+      r.fromUser = new Schema.Types.ObjectId(req.userId);
+      r.toUser = new Schema.Types.ObjectId(req.params.user_id);
+      r.relation = 'follow';
+
+      try {
+         const d = await r.save();
+         let response = new APIResponse(true, 201, d);
+         res.status(201).send(response);
+      } catch (err) {
+         let apiError = new APIError(err.message, null, 422);
+         next(apiError);
+      }
    }
 }
