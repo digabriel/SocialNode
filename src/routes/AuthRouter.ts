@@ -3,8 +3,8 @@ import {APIError, APIErrorCodes} from './../models/APIError';
 import {User} from '../models/User';
 import {Router, Request, Response, Application} from 'express';
 import {check, validationResult} from 'express-validator/check';
-import * as randomstring from 'randomstring';
 import * as jwt from 'jsonwebtoken';
+import {newAuthToken, newRefreshToken} from './../helpers/AuthHelpers';
 
 export class AuthRouter {
    private router: Router;
@@ -35,6 +35,7 @@ export class AuthRouter {
    ];
 
    private async validateAuth(req: Request, res: Response, next) {
+      // Check if the request is empty
       if (!validationResult(req).isEmpty()) {
          const apiError = new APIError(res.__('auth_wrong_request_message'), 400, 400);
          return next(apiError);
@@ -61,9 +62,8 @@ export class AuthRouter {
             return next(APIError.errorForCode(APIErrorCodes.AUTH_FAILED, req));
          }
 
-         const refreshToken = randomstring.generate({length: 100, charset: 'alphabetic'});
-
-         const token = await this.generateNewToken(user._id, refreshToken);
+         const refreshToken = newRefreshToken();
+         const token = await newAuthToken(user._id, refreshToken);
 
          const data = {
             access_token: token,
@@ -80,7 +80,7 @@ export class AuthRouter {
    // Auth Refresh
    private refreshToken(req: Request, res: Response, next) {
       const self = this;
-
+      // Check if the request is empty
       if (!validationResult(req).isEmpty()) {
          const apiError = new APIError(res.__('auth_refresh_wrong_request_message'), 400, 400);
          return next(apiError);
@@ -93,14 +93,14 @@ export class AuthRouter {
          }
 
          // Check if the refresh_token is valid
-         if (decoded.refresh_token != req.body.refres_token) {
+         if (decoded.refresh_token != req.body.refresh_token) {
             return next(APIError.errorForCode(APIErrorCodes.INVALID_REFRESH_TOKEN, req));
          }
 
-         const refreshToken = randomstring.generate({length: 100, charset: 'alphabetic'});
-
+         // Generate a new combination of access_token and refresh_token
+         const refreshToken = newRefreshToken();
          try {
-            const newToken = await self.generateNewToken(decoded.user_id, refreshToken);
+            const newToken = await newAuthToken(decoded.user_id, refreshToken);
 
             const data = {
                access_token: newToken,
@@ -111,24 +111,6 @@ export class AuthRouter {
          } catch (err) {
             return next(err);
          }
-      });
-   }
-
-   //Helpers
-   private generateNewToken(userId: String, refreshToken: String): Promise<String> {
-      return new Promise<String>((resolve, reject) => {
-         jwt.sign(
-            {user_id: userId},
-            process.env.JWT_SECRET,
-            {expiresIn: process.env.JWT_EXPIRATION_TIME},
-            function(err, token) {
-               if (err) {
-                  return reject(APIError.unknown());
-               }
-
-               resolve(token);
-            }
-         );
       });
    }
 }

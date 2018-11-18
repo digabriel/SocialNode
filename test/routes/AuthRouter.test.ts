@@ -114,6 +114,9 @@ describe('AuthRouter', () => {
                   .send(refreshJSON)
                   .end((err, res) => {
                      const data = res.body.data;
+
+                     assert.notExists(err, 'We have an error: ' + err);
+                     assert.exists(data, 'No response data');
                      validateAuthTokens(data);
                      done();
                   });

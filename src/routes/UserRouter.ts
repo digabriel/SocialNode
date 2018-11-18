@@ -4,6 +4,7 @@ import {APIResponse} from './../models/APIResponse';
 import {User, UserInterface} from '../models/User';
 import {Router, Request, Response, Application} from 'express';
 import {Types} from 'mongoose';
+import MyRequest from 'models/MyRequest';
 
 export class UserRouter extends BaseRouter<UserInterface> {
    private router: Router;
@@ -46,7 +47,12 @@ export class UserRouter extends BaseRouter<UserInterface> {
       this.create(newUser, res, next);
    }
 
-   private async followUser(req: Request, res: Response, next) {
+   private async followUser(req: MyRequest, res: Response, next) {
+      // Check if we have a authenticated user
+      if (!req.isAuthenticated) {
+         return next(APIError.errorForCode(APIErrorCodes.INVALID_ACCESS_TOKEN, req));
+      }
+
       res.status(200).send();
    }
 }
